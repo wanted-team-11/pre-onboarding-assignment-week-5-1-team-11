@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import { getSearchResults } from "../services/api";
+// import { getSearchResults } from "../services/api";
+import queryInstance from "../utils/search-result-cache";
 import type { Sick } from "../types";
 import styled from "styled-components";
 import { ReactComponent as SearchSVG } from "../assets/SearchIcon.svg";
@@ -13,9 +14,8 @@ const SearchBox = () => {
   const [searchWord, setSearchWord] = useState("");
 
   const getSearchWords = async (value: string) => {
-    const [sicks, error] = await getSearchResults(value);
-    if (!error && sickList !== null) setSickList(sicks);
-    console.log(sicks);
+    const { sickList: sicks, isError } = await queryInstance.query(value);
+    if (!isError && sicks !== null) setSickList(sicks);
   };
 
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>();
