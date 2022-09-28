@@ -12,7 +12,8 @@ interface Prop extends IndexProp {
 
 function Suggestion(props: Prop) {
   const { isLast, isSelected, value, keyWord } = props;
-  const matchText = value.split(new RegExp(`(${keyWord})`, "gi"));
+  const matchedText = new RegExp(`(${keyWord})`, "gi");
+  const splittedTexts = value.split(matchedText);
 
   return (
     <Container
@@ -21,11 +22,12 @@ function Suggestion(props: Prop) {
       onClick={() => alert(value)}
     >
       <SearchIcon className="material-symbols-outlined">search</SearchIcon>
-      <Text>
-        {matchText.map((text, index) =>
-          text === keyWord ? <Bold key={index}>{text}</Bold> : text
-        )}
-      </Text>
+      <TextBox>
+        {splittedTexts.map((text, index) => {
+          const isMatched = text === keyWord;
+          return isMatched ? <Bold key={index}>{text}</Bold> : text;
+        })}
+      </TextBox>
     </Container>
   );
 }
@@ -50,7 +52,7 @@ const SearchIcon = styled.div`
   left: 10px;
 `;
 
-const Text = styled.div`
+const TextBox = styled.div`
   position: relative;
   width: 85%;
   left: 20px;
