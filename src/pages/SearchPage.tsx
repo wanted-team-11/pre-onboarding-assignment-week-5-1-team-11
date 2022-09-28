@@ -19,7 +19,6 @@ const ESCAPE = "Escape";
 
 const SearchPage = () => {
   const [sickListVisible, setSickListVisible] = useState<boolean>(false);
-  const [keyBoardTrigger, setKeyBoardTrigger] = useState<boolean>(true);
   const [fetchedSickList, setFetchedSickList] = useState<GetFetchType[]>([]);
   const [searchInputValue, setSearchInputValue] = useState<string>("");
   const [liTagIndex, setLiTagIndex] = useState<number>(-1);
@@ -31,7 +30,7 @@ const SearchPage = () => {
 
   useEffect(() => {
     const fetchInput = async () => {
-      if (debouncedSearchInputValue) {
+      if (debouncedSearchInputValue && liTagIndex === -1) {
         setLiTagIndex(() => -1);
         const data = await getFetchData(debouncedSearchInputValue);
         setFetchedSickList(() => [...data]);
@@ -39,11 +38,12 @@ const SearchPage = () => {
       return;
     };
     fetchInput();
-  }, [debouncedSearchInputValue]);
+  }, [debouncedSearchInputValue, liTagIndex]);
 
   const onChangeInputValue = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.currentTarget.value;
     setSearchInputValue(() => value);
+    setLiTagIndex(() => -1);
   };
 
   const onSubmitInputValue = (event: FormEvent<HTMLFormElement>) => {
@@ -55,7 +55,7 @@ const SearchPage = () => {
   };
 
   const onKeyDownSetIndex = (event: KeyboardEvent) => {
-    if (debouncedSearchInputValue.length > 0) {
+    if (debouncedSearchInputValue.length > 0 && fetchedSickList.length > 0) {
       switch (event.key) {
         case ARROWDOWN:
           setLiTagIndex((prev) => prev + 1);
@@ -66,12 +66,15 @@ const SearchPage = () => {
             setLiTagIndex(() => 0);
           }
           break;
+
         case ARROWUP:
           setLiTagIndex((prev) => prev - 1);
+
           if (liTagIndex <= 0) {
             setLiTagIndex(() => -1);
           }
           break;
+
         case ESCAPE:
           setLiTagIndex(() => -1);
           break;
@@ -86,6 +89,7 @@ const SearchPage = () => {
         <SearchBox>
           <SearchForm onSubmit={onSubmitInputValue}>
             <input
+              value={fetchedSickList[liTagIndex]?.sickNm || searchInputValue}
               ref={inputMouseFocusRef}
               type="search"
               spellCheck={false}
@@ -94,7 +98,7 @@ const SearchPage = () => {
               onClick={onClickInputElementTag}
               onKeyDown={onKeyDownSetIndex}
             />
-            <button type="submit">돋보기</button>
+            <button type="submit">검색</button>
           </SearchForm>
           <SearchResultDataList
             liTagIndex={liTagIndex}
