@@ -2,34 +2,54 @@ import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import Suggestion from "../components/Suggestion";
 import styled from "styled-components";
-import { fetchSearchList } from "../api/searchApi";
+import { fetchSuggetedList } from "../api/searchApi";
 import useDebounce from "../hooks/useDebounce";
 
-interface SearchResult {
+interface SuggetedSickList {
   sickCd: string;
   sickNm: string;
 }
 
 function Search() {
-  const [searchResult, setSearchResult] = useState<SearchResult[]>([]);
+  const [suggetedSickList, setSuggetedSickList] = useState<SuggetedSickList[]>(
+    []
+  );
   const [keyWord, setKeyWord] = useState("");
   const [selected, setSelected] = useState(0);
-
   const debounceKeyWord = useDebounce(keyWord);
+  const isCached = localStorage.getItem(debounceKeyWord) !== null;
+  const cachedResult = JSON.parse(localStorage.getItem(debounceKeyWord)!);
+  const isStale =
+    JSON.parse(localStorage.getItem(debounceKeyWord + "Exp")!) < Date.now();
+
+  const fetchSuggetedListWithCaching = () => {
+    fetchSuggetedList(debounceKeyWord)
+      .then((res) => {
+        localStorage.setItem(debounceKeyWord, JSON.stringify(res.data));
+        localStorage.setItem(
+          debounceKeyWord + "Exp",
+          JSON.stringify(Date.now() + 60 * 60 * 1000)
+        );
+        setSuggetedSickList(res.data);
+      })
+      .catch((error) => {
+        if (error instanceof AxiosError) {
+          alert(error.response?.data);
+        } else {
+          alert(error);
+        }
+      });
+  };
 
   useEffect(() => {
-    if (debounceKeyWord !== "") {
-      fetchSearchList(debounceKeyWord)
-        .then((res) => {
-          setSearchResult(res.data);
-        })
-        .catch((error) => {
-          if (error instanceof AxiosError) {
-            alert(error.response?.data);
-          } else {
-            alert(error);
-          }
-        });
+    if (isCached && isStale) {
+      localStorage.removeItem(debounceKeyWord);
+      localStorage.removeItem(debounceKeyWord + "Exp");
+      fetchSuggetedListWithCaching();
+    } else if (isCached) {
+      setSuggetedSickList(cachedResult);
+    } else if (!isCached && debounceKeyWord !== "") {
+      fetchSuggetedListWithCaching();
     }
   }, [debounceKeyWord]);
 
@@ -42,17 +62,17 @@ function Search() {
     if (keyWord === "") setSelected(0);
     else if (e.key === "Backspace") setSelected(0);
     else if (selected >= 2 && e.key === "ArrowUp") setSelected(selected - 1);
-    else if (selected < searchResult.length && e.key === "ArrowDown")
+    else if (selected < suggetedSickList.length && e.key === "ArrowDown")
       setSelected(selected + 1);
     else if (selected > 0 && e.key === "Enter")
-      alert(searchResult[selected - 1].sickNm);
+      alert(suggetedSickList[selected - 1].sickNm);
     else if (/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(e.key)) {
       setSelected(-1);
     }
   };
 
-  const isNotFound = keyWord !== "" && searchResult.length === 0;
-  const isExist = keyWord !== "" && searchResult.length !== 0;
+  const isNotFound = keyWord !== "" && suggetedSickList.length === 0;
+  const isExist = keyWord !== "" && suggetedSickList.length !== 0;
   const isSearched = keyWord !== "";
 
   return (
@@ -83,11 +103,11 @@ function Search() {
         </SuggestionTitle>
       )}
       {isSearched &&
-        searchResult.map((search, index) => (
+        suggetedSickList.map((suggetedSick, index) => (
           <Suggestion
-            key={search.sickCd}
-            value={search.sickNm}
-            isLast={index === searchResult.length - 1}
+            key={suggetedSick.sickCd}
+            value={suggetedSick.sickNm}
+            isLast={index === suggetedSickList.length - 1}
             isSelected={index === selected - 1}
             keyWord={keyWord}
           />

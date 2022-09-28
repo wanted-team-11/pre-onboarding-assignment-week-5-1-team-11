@@ -1,7 +1,7 @@
 import { baseInstance } from "./instance";
 
-const fetchSearchList = async (keyword: string) => {
+const fetchSuggetedList = async (keyword: string) => {
   return baseInstance.get(`/sick?q=${keyword}`);
 };
 
-export { fetchSearchList };
+export { fetchSuggetedList };
