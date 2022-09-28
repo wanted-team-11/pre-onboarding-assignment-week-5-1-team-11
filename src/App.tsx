@@ -1,22 +1,63 @@
 import * as S from "./styles/SearchStyle";
+import { useState, useEffect } from "react";
+import SickDataProps from "./types/SickTypes";
+import { getData, submitData } from "./api/api";
 
 function App() {
+  const [sickData, setSickData] = useState([]);
+  const [searchData, setSearchData] = useState("");
+  const [cachingData, setCachingData] = useState([]);
+
+  useEffect(() => {
+    getData().then((data) => {
+      setSickData(data);
+    });
+  }, []);
+
+  const onChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchData(e.target.value);
+  };
+
+  const onSubmitSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    submitData(searchData).then((data) => setCachingData(data));
+    console.log("calling api");
+  };
+
+  const filterData = sickData.filter((el: SickDataProps) => {
+    return el.sickNm.includes(searchData);
+  });
+
   return (
     <S.Container>
       <S.SearchBox>
         <S.SearchTitle>국내 임상시험 검색하고</S.SearchTitle>
         <S.SearchTitle>온라인으로 참여하기</S.SearchTitle>
-        <S.SearchInputBox>
+        <S.SearchInputBox onSubmit={onSubmitSearch}>
           <S.SearchIcon />
-          <S.SearchInput type="text" />
+          <S.SearchInput
+            onChange={onChangeSearch}
+            type="text"
+            value={searchData}
+          />
           <S.SearchButton type="button">검색</S.SearchButton>
         </S.SearchInputBox>
         <S.SearchResultBox>
           <S.RecommendResult>추천 검색어</S.RecommendResult>
-          <S.SearchResult>
-            <S.SearchIcon />
-            <S.SearchText>검색</S.SearchText>
-          </S.SearchResult>
+          <S.SearchScroll>
+            {searchData.length > 0 ? (
+              filterData.map((el: SickDataProps) => {
+                return (
+                  <S.SearchResult key={el.sickCd}>
+                    <S.SearchIcon />
+                    <S.SearchText>{el.sickNm}</S.SearchText>
+                  </S.SearchResult>
+                );
+              })
+            ) : (
+              <S.DataNotExist>검색과 일치하는 결과가 없습니다</S.DataNotExist>
+            )}
+          </S.SearchScroll>
         </S.SearchResultBox>
       </S.SearchBox>
     </S.Container>

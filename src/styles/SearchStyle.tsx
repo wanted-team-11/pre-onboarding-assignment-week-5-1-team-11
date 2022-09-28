@@ -66,20 +66,25 @@ export const SearchButton = styled.button`
 
 export const SearchResultBox = styled.div`
   margin-top: 20px;
+  overflow: hidden;
+  border-radius: 20px;
+  background-color: white;
+`;
+
+export const SearchScroll = styled.div`
   width: 640px;
   height: 320px;
-  background-color: white;
-  border-radius: 20px;
+
   overflow: scroll;
   ::-webkit-scrollbar {
     display: none;
   }
 `;
-
 export const RecommendResult = styled.div`
   margin: 10px 0 10px 10px;
   padding: 13px;
   font-size: 15px;
+  background-color: white;
   color: gray;
   font-weight: bold;
 `;
@@ -94,4 +99,13 @@ export const SearchText = styled.div`
   padding: 20px;
   margin-left: 40px;
   font-size: 15px;
+`;
+
+export const DataNotExist = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 230px;
+  font-size: 30px;
+  color: #ababab;
 `;
