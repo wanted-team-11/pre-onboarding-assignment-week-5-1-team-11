@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import GetFetchType from "../types/getFetchType";
+import HighlightText from "./HighlightText";
 
 interface SearchResultDataListProps {
   sickListVisible: boolean;
@@ -23,7 +24,11 @@ const SearchResultDataList = ({
     <ListContainer>
       {fetchedSickList.map((sickItem) => (
         <li key={sickItem.sickCd}>
-          <span>{sickItem.sickNm}</span>
+          <HighlightText
+            keyword={debouncedSearchInputValue}
+            sickNm={sickItem.sickNm}
+          />
+          {/* <span>{sickItem.sickNm}</span> */}
         </li>
       ))}
     </ListContainer>
@@ -43,6 +48,9 @@ const ListContainer = styled.ul`
     margin: 7px 0;
     :hover {
       background-color: #f0f0f0;
+    }
+    strong {
+      font-weight: bold;
     }
   }
 `;
