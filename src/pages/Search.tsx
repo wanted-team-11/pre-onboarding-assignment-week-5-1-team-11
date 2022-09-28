@@ -4,32 +4,29 @@ import Suggestion from "../components/Suggestion";
 import styled from "styled-components";
 import { fetchSuggetedList } from "../api/searchApi";
 import useDebounce from "../hooks/useDebounce";
+import { sickListStorage } from "../storage/sickListStorage";
 
-interface SuggetedSickList {
+interface Sick {
   sickCd: string;
   sickNm: string;
 }
 
 function Search() {
-  const [suggetedSickList, setSuggetedSickList] = useState<SuggetedSickList[]>(
-    []
-  );
+  const [suggetedSickList, setSuggetedSickList] = useState<Sick[]>([]);
   const [keyWord, setKeyWord] = useState("");
-  const [selected, setSelected] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
   const debounceKeyWord = useDebounce(keyWord);
-  const isCached = localStorage.getItem(debounceKeyWord) !== null;
-  const cachedResult = JSON.parse(localStorage.getItem(debounceKeyWord)!);
-  const isStale =
-    JSON.parse(localStorage.getItem(debounceKeyWord + "Exp")!) < Date.now();
+
+  const isCached = sickListStorage.get(debounceKeyWord) !== null;
+  const cachedSickList = JSON.parse(sickListStorage.get(debounceKeyWord)!);
+  const expiresIn = sickListStorage.get(debounceKeyWord + "_expiresIn")!;
+  const isStale = JSON.parse(expiresIn) < Date.now();
 
   const fetchSuggetedListWithCaching = () => {
     fetchSuggetedList(debounceKeyWord)
       .then((res) => {
-        localStorage.setItem(debounceKeyWord, JSON.stringify(res.data));
-        localStorage.setItem(
-          debounceKeyWord + "Exp",
-          JSON.stringify(Date.now() + 60 * 60 * 1000)
-        );
+        sickListStorage.set(debounceKeyWord, res.data);
         setSuggetedSickList(res.data);
       })
       .catch((error) => {
@@ -43,11 +40,10 @@ function Search() {
 
   useEffect(() => {
     if (isCached && isStale) {
-      localStorage.removeItem(debounceKeyWord);
-      localStorage.removeItem(debounceKeyWord + "Exp");
+      sickListStorage.remove(debounceKeyWord);
       fetchSuggetedListWithCaching();
     } else if (isCached) {
-      setSuggetedSickList(cachedResult);
+      setSuggetedSickList(cachedSickList);
     } else if (!isCached && debounceKeyWord !== "") {
       fetchSuggetedListWithCaching();
     }
@@ -58,16 +54,17 @@ function Search() {
     setKeyWord(value);
   };
 
-  const handleSelect = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (keyWord === "") setSelected(0);
-    else if (e.key === "Backspace") setSelected(0);
-    else if (selected >= 2 && e.key === "ArrowUp") setSelected(selected - 1);
-    else if (selected < suggetedSickList.length && e.key === "ArrowDown")
-      setSelected(selected + 1);
-    else if (selected > 0 && e.key === "Enter")
-      alert(suggetedSickList[selected - 1].sickNm);
+  const handleSelectedIndex = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (keyWord === "") setSelectedIndex(0);
+    else if (e.key === "Backspace") setSelectedIndex(0);
+    else if (selectedIndex >= 2 && e.key === "ArrowUp")
+      setSelectedIndex(selectedIndex - 1);
+    else if (selectedIndex < suggetedSickList.length && e.key === "ArrowDown")
+      setSelectedIndex(selectedIndex + 1);
+    else if (selectedIndex > 0 && e.key === "Enter")
+      alert(suggetedSickList[selectedIndex - 1].sickNm);
     else if (/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(e.key)) {
-      setSelected(-1);
+      setSelectedIndex(-1);
     }
   };
 
@@ -88,7 +85,7 @@ function Search() {
           placeholder="질환명을 입력해 주세요."
           value={keyWord}
           onChange={handleInput}
-          onKeyDown={handleSelect}
+          onKeyDown={handleSelectedIndex}
         />
         <Button>검색</Button>
       </InputBox>
@@ -103,15 +100,22 @@ function Search() {
         </SuggestionTitle>
       )}
       {isSearched &&
-        suggetedSickList.map((suggetedSick, index) => (
-          <Suggestion
-            key={suggetedSick.sickCd}
-            value={suggetedSick.sickNm}
-            isLast={index === suggetedSickList.length - 1}
-            isSelected={index === selected - 1}
-            keyWord={keyWord}
-          />
-        ))}
+        suggetedSickList.map((suggetedSick, index) => {
+          const { sickCd, sickNm } = suggetedSick;
+          const isLast = index === suggetedSickList.length - 1;
+          const isSelected = index === selectedIndex - 1;
+
+          return (
+            <Suggestion
+              key={sickCd}
+              value={sickNm}
+              isLast={isLast}
+              isSelected={isSelected}
+              keyWord={keyWord}
+            />
+          );
+        })}
+      )
     </Container>
   );
 }
