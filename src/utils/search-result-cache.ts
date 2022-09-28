@@ -45,7 +45,7 @@ class QueryImpl implements Query {
   }
 
   async getSearchResults(searchWord: string) {
-    // console.log("calling api");
+    console.info("calling api");
     try {
       if (!searchWord) return { sickList: [], error: null };
       const response = await fetch(`/sick?q=${searchWord}&_page=1&_limit=5`);
@@ -61,15 +61,11 @@ class QueryImpl implements Query {
     this.#localCache[uri] = sickList;
     setTimeout(() => {
       this.invalidate(uri);
-    }, 10000); // 1 min => 60000
-    console.log(`just set cahce ${uri}`);
-    console.log({ ...this.#localCache });
+    }, 60000); // 1 min => 60000
   }
 
   invalidate(uri: string) {
     delete this.#localCache[uri];
-    console.log(`just invalidated ${uri}`);
-    console.log({ ...this.#localCache });
   }
 }
 

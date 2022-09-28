@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import styled from "styled-components";
 
 interface HighlightedTextProps {
@@ -7,14 +8,22 @@ interface HighlightedTextProps {
 
 const HighlightedText = ({ children, keyword }: HighlightedTextProps) => {
   const highlightText = (text: string, keyword: string) => {
-    return text.replaceAll(keyword, `<strong>${keyword}</strong>`);
+    const splitted = text.split(keyword);
+    return splitted.map((word, idx, arr) => (
+      <Fragment key={idx}>
+        {idx < arr.length - 1 ? (
+          <>
+            {word}
+            <strong>{keyword}</strong>
+          </>
+        ) : (
+          <>{word}</>
+        )}
+      </Fragment>
+    ));
   };
 
-  return (
-    <Text
-      dangerouslySetInnerHTML={{ __html: highlightText(children, keyword) }}
-    />
-  );
+  return <Text>{highlightText(children, keyword)}</Text>;
 };
 
 export default HighlightedText;

@@ -33,7 +33,6 @@ const SearchBox = () => {
     setFocused((prev) => prev - 1);
   };
   const onKeyDown = (e: React.KeyboardEvent) => {
-    console.log("onKeyDown");
     switch (e.code) {
       case "ArrowDown": {
         if (!e.nativeEvent.isComposing) down();
