@@ -1,25 +1,25 @@
-import React from "react";
-import logo from "./logo.svg";
-import "./App.css";
+import * as S from "./styles/SearchStyle";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <S.Container>
+      <S.SearchBox>
+        <S.SearchTitle>국내 임상시험 검색하고</S.SearchTitle>
+        <S.SearchTitle>온라인으로 참여하기</S.SearchTitle>
+        <S.SearchInputBox>
+          <S.SearchIcon />
+          <S.SearchInput type="text" />
+          <S.SearchButton type="button">검색</S.SearchButton>
+        </S.SearchInputBox>
+        <S.SearchResultBox>
+          <S.RecommendResult>추천 검색어</S.RecommendResult>
+          <S.SearchResult>
+            <S.SearchIcon />
+            <S.SearchText>검색</S.SearchText>
+          </S.SearchResult>
+        </S.SearchResultBox>
+      </S.SearchBox>
+    </S.Container>
   );
 }
 
