@@ -20,13 +20,7 @@ function Suggestion(props: Prop) {
       <SearchIcon className="material-symbols-outlined">search</SearchIcon>
       <Text>
         {matchText.map((text, index) =>
-          text === keyWord ? (
-            <span key={index} style={{ fontWeight: 700 }}>
-              {text}
-            </span>
-          ) : (
-            text
-          )
+          text === keyWord ? <Bold key={index}>{text}</Bold> : text
         )}
       </Text>
     </Container>
