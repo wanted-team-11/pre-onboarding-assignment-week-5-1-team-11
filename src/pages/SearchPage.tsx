@@ -1,4 +1,11 @@
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  KeyboardEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import styled from "styled-components";
 import SearchResultDataList from "../components/SearchResultDataList";
 import useDebounce from "../hooks/useDebounce.hook";
@@ -6,18 +13,26 @@ import useOnClickOutside from "../hooks/useOnClickOutSide";
 import getFetchData from "../services/getFetchData.service";
 import GetFetchType from "../types/getFetchType";
 
+const ARROWDOWN = "ArrowDown";
+const ARROWUP = "ArrowUp";
+const ESCAPE = "Escape";
+
 const SearchPage = () => {
+  const [sickListVisible, setSickListVisible] = useState<boolean>(false);
   const [fetchedSickList, setFetchedSickList] = useState<GetFetchType[]>([]);
   const [searchInputValue, setSearchInputValue] = useState<string>("");
+  const [liTagIndex, setLiTagIndex] = useState<number>(-1);
+  const inputMouseFocusRef = useRef<HTMLInputElement>(null);
+  const sickListKeyBoardMoveRef = useRef<HTMLUListElement>(null);
   const debouncedSearchInputValue = useDebounce<string>(searchInputValue, 1000);
-  const inputFocusRef = useRef<HTMLInputElement>(null);
-  const [sickListVisible, setSickListVisible] = useState<boolean>(false);
 
-  useOnClickOutside(inputFocusRef, () => setSickListVisible(() => false));
+  useOnClickOutside(inputMouseFocusRef, () => setSickListVisible(() => false));
+
   useEffect(() => {
     if (debouncedSearchInputValue) {
+      setLiTagIndex(() => -1);
       getFetchData<GetFetchType[]>(debouncedSearchInputValue).then((data) => {
-        setFetchedSickList([...data]);
+        setFetchedSickList(() => [...data]);
       });
     }
   }, [debouncedSearchInputValue]);
@@ -29,11 +44,37 @@ const SearchPage = () => {
 
   const onSubmitInputValue = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("submit");
   };
-  const onClickInputTag = () => {
+
+  const onClickInputElementTag = () => {
     setSickListVisible(() => true);
   };
+
+  const onKeyDownSetIndex = (event: KeyboardEvent) => {
+    if (debouncedSearchInputValue.length > 0) {
+      switch (event.key) {
+        case ARROWDOWN:
+          setLiTagIndex((prev) => prev + 1);
+          if (
+            sickListKeyBoardMoveRef.current?.childElementCount ===
+            liTagIndex + 1
+          ) {
+            setLiTagIndex(() => 0);
+          }
+          break;
+        case ARROWUP:
+          setLiTagIndex((prev) => prev - 1);
+          if (liTagIndex <= 0) {
+            setLiTagIndex(() => -1);
+          }
+          break;
+        case ESCAPE:
+          setLiTagIndex(() => -1);
+          break;
+      }
+    }
+  };
+
   return (
     <PageWrapper>
       <Header />
@@ -41,16 +82,19 @@ const SearchPage = () => {
         <SearchBox>
           <SearchForm onSubmit={onSubmitInputValue}>
             <input
-              ref={inputFocusRef}
+              ref={inputMouseFocusRef}
               type="search"
               spellCheck={false}
               placeholder={"질환명을 입력하세요."}
               onChange={onChangeInputValue}
-              onClick={onClickInputTag}
+              onClick={onClickInputElementTag}
+              onKeyDown={onKeyDownSetIndex}
             />
             <button type="submit">돋보기</button>
           </SearchForm>
           <SearchResultDataList
+            liTagIndex={liTagIndex}
+            sickListKeyBoardMoveRef={sickListKeyBoardMoveRef}
             sickListVisible={sickListVisible}
             debouncedSearchInputValue={debouncedSearchInputValue}
             fetchedSickList={fetchedSickList}
