@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-// import { getSearchResults } from "../services/api";
+import React, { useState, useEffect } from "react";
+import useDebounce from "../hooks/useDebounce";
 import queryInstance from "../utils/search-result-cache";
 import type { Sick } from "../types";
 import styled from "styled-components";
@@ -7,38 +7,48 @@ import { ReactComponent as SearchSVG } from "../assets/SearchIcon.svg";
 
 import SearchResultList from "./SearchResultList.component";
 
-const DELAY = 200;
-
 const SearchBox = () => {
   const [sickList, setSickList] = useState<Sick[]>([]);
   const [searchWord, setSearchWord] = useState("");
+  const { resetTimer } = useDebounce();
 
   const getSearchWords = async (value: string) => {
     const { sickList: sicks, isError } = await queryInstance.query(value);
     if (!isError && sicks !== null) setSickList(sicks);
   };
 
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>();
-
-  const setTimer = (callback: () => void, delay: number) => {
-    return setTimeout(callback, delay);
-  };
-
-  const resetTimer = (callback: () => void, delay: number) => {
-    if (!timer.current) {
-      timer.current = setTimer(callback, DELAY);
-    } else {
-      clearTimeout(timer.current);
-
-      timer.current = setTimer(callback, delay);
-    }
-  };
-
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
     setSearchWord(value);
-    resetTimer(() => getSearchWords(value), DELAY);
+    resetTimer(() => getSearchWords(value), 200);
   };
+
+  const [focused, setFocused] = useState(0);
+  const down = () => {
+    if (focused >= sickList.length - 1) return;
+    setFocused((prev) => prev + 1);
+  };
+  const up = () => {
+    if (focused <= 0) return;
+    setFocused((prev) => prev - 1);
+  };
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    console.log("onKeyDown");
+    switch (e.code) {
+      case "ArrowDown": {
+        if (!e.nativeEvent.isComposing) down();
+        break;
+      }
+      case "ArrowUp": {
+        up();
+        break;
+      }
+    }
+  };
+
+  useEffect(() => {
+    setFocused(-1);
+  }, [searchWord]);
 
   return (
     <Container>
@@ -47,12 +57,18 @@ const SearchBox = () => {
           type="text"
           placeholder="질환명을 입력해주세요"
           onChange={onChange}
+          onKeyDown={onKeyDown}
+          value={sickList[focused]?.sickNm || searchWord}
         />
         <button>
           <SearchSVG />
         </button>
       </InputWrapper>
-      <SearchResultList sickList={sickList} keyword={searchWord} />
+      <SearchResultList
+        sickList={sickList}
+        keyword={searchWord}
+        focused={focused}
+      />
     </Container>
   );
 };

@@ -6,17 +6,22 @@ import Highlight from "./HighlightedText.component";
 interface SearchResultListProps {
   sickList: Sick[];
   keyword: string;
+  focused: number;
 }
 
-const SearchResultList = ({ sickList, keyword }: SearchResultListProps) => {
+const SearchResultList = ({
+  sickList,
+  keyword,
+  focused,
+}: SearchResultListProps) => {
   return (
     <ResultsContainer>
       {sickList.length > 0 ? (
         <>
           <span>추천 검색어</span>
           {sickList.length > 0 &&
-            sickList.map((sick) => (
-              <Result key={sick.sickCd}>
+            sickList.map((sick, index) => (
+              <Result key={sick.sickCd} isFocused={index === focused}>
                 <SearchIcon />
                 <Highlight keyword={keyword}>{sick.sickNm}</Highlight>
               </Result>
@@ -48,9 +53,10 @@ const ResultsContainer = styled.ul`
   }
 `;
 
-const Result = styled.li`
+const Result = styled.li<{ isFocused: boolean }>`
   padding: 1em 0;
   font-size: 20px;
+  background-color: ${(props) => (props.isFocused ? "#e3e3e3" : "white")};
 `;
 
 const SearchIcon = styled(SearchSVG)`
