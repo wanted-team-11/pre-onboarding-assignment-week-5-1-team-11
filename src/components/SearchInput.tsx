@@ -1,15 +1,50 @@
+import { ChangeEvent, useState } from "react";
 import styled from "styled-components";
+import { getKeywords } from "../axios";
+import { BiSearch } from "react-icons/bi";
 
-function Input() {
+function SearchInput() {
+  const [keywords, setKeywords] = useState<any[]>([]);
+
+  const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    let timer: any = 0;
+    let searchKeyword = e.target.value;
+
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+      searchKeyword = e.target.value;
+      if (searchKeyword.length > 0) {
+        getKeywords(e.target.value).then((res) => setKeywords(res));
+      } else {
+        setKeywords([]);
+      }
+    }, 500);
+  };
+
   return (
     <StyledInputWrapper>
-      <StyledInput />
+      <StyledInput onChange={onInputChange} />
       <StyledButton>검색</StyledButton>
+      {keywords.length > 0 && (
+        <StyledResultWrapper>
+          <StyledUl>
+            {keywords.map((val, index) => (
+              <StyledLi key={index}>
+                <BiSearch />
+                &nbsp;
+                {val.sickNm}
+              </StyledLi>
+            ))}{" "}
+          </StyledUl>
+        </StyledResultWrapper>
+      )}
     </StyledInputWrapper>
   );
 }
 
-export default Input;
+export default SearchInput;
 
 const StyledInputWrapper = styled.div``;
 
@@ -33,4 +68,21 @@ const StyledButton = styled.button`
   border-bottom-right-radius: 50px;
   font-size: 18px;
   color: #fff;
+`;
+
+const StyledResultWrapper = styled.div`
+  background-color: #fff;
+  border-radius: 20px;
+`;
+
+const StyledUl = styled.ul`
+  text-align: left;
+  list-style: none;
+  padding-top: 20px;
+  padding-bottom: 10px;
+  margin-left: 0;
+`;
+
+const StyledLi = styled.li`
+  margin-bottom: 15px;
 `;

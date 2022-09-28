@@ -1,5 +1,5 @@
-function Title({ children }: { children: string }) {
+function SearchTitle({ children }: { children: string }) {
   return <h2>{children}</h2>;
 }
 
-export default Title;
+export default SearchTitle;
