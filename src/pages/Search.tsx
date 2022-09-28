@@ -21,7 +21,6 @@ function Search() {
     if (debounceKeyWord !== "") {
       fetchSearchList(debounceKeyWord)
         .then((res) => {
-          console.info("calling api");
           setSearchResult(res.data);
         })
         .catch((error) => {

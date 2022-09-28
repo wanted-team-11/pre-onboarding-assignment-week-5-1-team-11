@@ -6,6 +6,7 @@ export const baseInstance = axios.create({
 
 baseInstance.interceptors.response.use(
   (res) => {
+    console.info("calling api");
     return { ...res };
   },
   (error) => {
