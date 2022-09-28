@@ -2,12 +2,21 @@ import * as S from "./styles/SearchStyle";
 import { useState, useEffect } from "react";
 import SickDataProps from "./types/SickTypes";
 import { getData, submitData } from "./api/api";
+import HighlightText from "./HighlightText";
 
 function App() {
   const [sickData, setSickData] = useState([]);
   const [searchData, setSearchData] = useState("");
   const [cachingData, setCachingData] = useState([]);
 
+  const setCache = async () => {
+    const cacheStorage = await caches.open("data");
+    const responsedCache = await cacheStorage.match(
+      "http://localhost:4000/sick"
+    );
+  };
+
+  //** Todo : cacheStorage에 변경사항이 없으면 useEffect를 실행시키지 않는다.
   useEffect(() => {
     getData().then((data) => {
       setSickData(data);
@@ -15,7 +24,8 @@ function App() {
   }, []);
 
   const onChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchData(e.target.value);
+    const { value } = e.target;
+    setSearchData(value);
   };
 
   const onSubmitSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -50,7 +60,10 @@ function App() {
                 return (
                   <S.SearchResult key={el.sickCd}>
                     <S.SearchIcon />
-                    <S.SearchText>{el.sickNm}</S.SearchText>
+
+                    <HighlightText sickNm={el.sickNm} searchData={searchData}>
+                      {el.sickNm}
+                    </HighlightText>
                   </S.SearchResult>
                 );
               })

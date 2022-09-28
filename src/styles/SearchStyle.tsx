@@ -101,6 +101,10 @@ export const SearchText = styled.div`
   font-size: 15px;
 `;
 
+export const StrongText = styled.span`
+  font-weight: bold;
+  font-size: 15px;
+`;
 export const DataNotExist = styled.div`
   display: flex;
   justify-content: center;
