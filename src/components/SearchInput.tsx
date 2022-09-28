@@ -18,4 +18,6 @@ const StyledInput = styled.input`
   height: 40px;
   border-top-left-radius: 50px;
   border-bottom-left-radius: 50px;
+  font-size: 20px;
+  padding-left: 15px;
 `;
