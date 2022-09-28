@@ -26,6 +26,13 @@ const SearchResultDataList = ({
       </ListContainer>
     );
 
+  if (fetchedSickList.length === 0)
+    return (
+      <ListContainer>
+        <span>검색결과가 없습니다.</span>
+      </ListContainer>
+    );
+
   return (
     <ListContainer ref={sickListKeyBoardMoveRef}>
       {fetchedSickList.map((sickItem, index) => (
