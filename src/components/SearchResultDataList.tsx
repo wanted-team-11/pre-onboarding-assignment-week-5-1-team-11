@@ -14,12 +14,14 @@ const SearchResultDataList = ({
   fetchedSickList,
 }: SearchResultDataListProps) => {
   if (!sickListVisible) return null;
+
   if (debouncedSearchInputValue.length === 0)
     return (
       <ListContainer>
         <span>검색어 없음</span>
       </ListContainer>
     );
+
   return (
     <ListContainer>
       {fetchedSickList.map((sickItem) => (
@@ -28,7 +30,6 @@ const SearchResultDataList = ({
             keyword={debouncedSearchInputValue}
             sickNm={sickItem.sickNm}
           />
-          {/* <span>{sickItem.sickNm}</span> */}
         </li>
       ))}
     </ListContainer>
