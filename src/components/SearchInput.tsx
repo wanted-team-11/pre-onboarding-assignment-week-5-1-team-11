@@ -48,7 +48,7 @@ function SearchInput() {
     <StyledInputWrapper>
       <StyledInput onChange={onInputChange} onKeyDown={onInputKeyDown} />
       <StyledButton>검색</StyledButton>
-      {keywords.length > 0 && (
+      {keywords.length > 0 ? (
         <StyledResultWrapper>
           <StyledUl ref={focusRef}>
             {keywords.map((val, index) => (
@@ -66,6 +66,8 @@ function SearchInput() {
             ))}
           </StyledUl>
         </StyledResultWrapper>
+      ) : (
+        <StyledResultWrapper>검색어없음</StyledResultWrapper>
       )}
     </StyledInputWrapper>
   );
@@ -98,8 +100,10 @@ const StyledButton = styled.button`
 `;
 
 const StyledResultWrapper = styled.div`
+  margin-top: 20px;
   background-color: #fff;
   border-radius: 20px;
+  text-align: left;
 `;
 
 const StyledUl = styled.ul`
