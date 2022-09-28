@@ -1,8 +1,11 @@
 import styled from "styled-components";
 
-interface Prop {
-  isLast?: boolean;
+interface IndexProp {
+  isLast: boolean;
   isSelected: boolean;
+}
+
+interface Prop extends IndexProp {
   value: string;
   keyWord: string;
 }
@@ -14,7 +17,7 @@ function Suggestion(props: Prop) {
   return (
     <Container
       isLast={isLast}
-      isSlected={isSelected}
+      isSelected={isSelected}
       onClick={() => alert(value)}
     >
       <SearchIcon className="material-symbols-outlined">search</SearchIcon>
@@ -27,17 +30,15 @@ function Suggestion(props: Prop) {
   );
 }
 
-const Container = styled.div<{
-  isLast: boolean | undefined;
-  isSlected: boolean;
-}>`
+const Container = styled.div`
   display: flex;
   align-items: center;
   margin: 0 auto;
   width: 490px;
   height: 50px;
-  border-radius: ${(props) => (props.isLast ? "0 0 10px 10px" : 0)};
-  background-color: ${(props) => (props.isSlected ? "lightgray " : "white")};
+  border-radius: ${(props: IndexProp) => (props.isLast ? "0 0 10px 10px" : 0)};
+  background-color: ${(props: IndexProp) =>
+    props.isSelected ? "lightgray " : "white"};
   &:hover {
     background-color: rgb(240, 240, 240);
     cursor: pointer;
