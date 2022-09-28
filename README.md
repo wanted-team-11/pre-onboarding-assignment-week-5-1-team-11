@@ -142,6 +142,10 @@
 - 입력이 완료된 후 200ms가 지났을 때 서버에 데이터를 요청하도록 한다.
 - 만일 200ms가 지나기 전 input change가 발생할 경우, 타이머를 리셋시킨다.
 
+
+https://user-images.githubusercontent.com/16061038/192788315-4d79905a-6353-411c-afb0-b672bb6c3a70.mov
+
+
 <br>
 
 ### 추천검색어 키보드컨트롤
