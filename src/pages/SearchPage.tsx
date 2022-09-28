@@ -19,6 +19,7 @@ const ESCAPE = "Escape";
 
 const SearchPage = () => {
   const [sickListVisible, setSickListVisible] = useState<boolean>(false);
+  const [keyBoardTrigger, setKeyBoardTrigger] = useState<boolean>(true);
   const [fetchedSickList, setFetchedSickList] = useState<GetFetchType[]>([]);
   const [searchInputValue, setSearchInputValue] = useState<string>("");
   const [liTagIndex, setLiTagIndex] = useState<number>(-1);
@@ -29,12 +30,15 @@ const SearchPage = () => {
   useOnClickOutside(inputMouseFocusRef, () => setSickListVisible(() => false));
 
   useEffect(() => {
-    if (debouncedSearchInputValue) {
-      setLiTagIndex(() => -1);
-      getFetchData<GetFetchType[]>(debouncedSearchInputValue).then((data) => {
+    const fetchInput = async () => {
+      if (debouncedSearchInputValue) {
+        setLiTagIndex(() => -1);
+        const data = await getFetchData(debouncedSearchInputValue);
         setFetchedSickList(() => [...data]);
-      });
-    }
+      }
+      return;
+    };
+    fetchInput();
   }, [debouncedSearchInputValue]);
 
   const onChangeInputValue = (event: ChangeEvent<HTMLInputElement>) => {
