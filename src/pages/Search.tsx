@@ -2,7 +2,7 @@ import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import Suggestion from "../components/Suggestion";
 import styled from "styled-components";
-import { fetchSuggetedList } from "../api/searchApi";
+import { fetchSuggestedList } from "../api/searchApi";
 import useDebounce from "../hooks/useDebounce";
 import { sickListStorage } from "../storage/sickListStorage";
 
@@ -12,7 +12,7 @@ interface Sick {
 }
 
 function Search() {
-  const [suggetedSickList, setSuggetedSickList] = useState<Sick[]>([]);
+  const [suggestedSickList, setSuggestedSickList] = useState<Sick[]>([]);
   const [keyWord, setKeyWord] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -23,11 +23,11 @@ function Search() {
   const expiresIn = sickListStorage.get(debounceKeyWord + "_expiresIn")!;
   const isStale = JSON.parse(expiresIn) < Date.now();
 
-  const fetchSuggetedListWithCaching = () => {
-    fetchSuggetedList(debounceKeyWord)
+  const fetchSuggestedListWithCaching = () => {
+    fetchSuggestedList(debounceKeyWord)
       .then((res) => {
         sickListStorage.set(debounceKeyWord, res.data);
-        setSuggetedSickList(res.data);
+        setSuggestedSickList(res.data);
       })
       .catch((error) => {
         if (error instanceof AxiosError) {
@@ -41,11 +41,11 @@ function Search() {
   useEffect(() => {
     if (isCached && isStale) {
       sickListStorage.remove(debounceKeyWord);
-      fetchSuggetedListWithCaching();
+      fetchSuggestedListWithCaching();
     } else if (isCached) {
-      setSuggetedSickList(cachedSickList);
+      setSuggestedSickList(cachedSickList);
     } else if (!isCached && debounceKeyWord !== "") {
-      fetchSuggetedListWithCaching();
+      fetchSuggestedListWithCaching();
     }
   }, [debounceKeyWord]);
 
@@ -59,17 +59,17 @@ function Search() {
     else if (e.key === "Backspace") setSelectedIndex(0);
     else if (selectedIndex >= 2 && e.key === "ArrowUp")
       setSelectedIndex(selectedIndex - 1);
-    else if (selectedIndex < suggetedSickList.length && e.key === "ArrowDown")
+    else if (selectedIndex < suggestedSickList.length && e.key === "ArrowDown")
       setSelectedIndex(selectedIndex + 1);
     else if (selectedIndex > 0 && e.key === "Enter")
-      alert(suggetedSickList[selectedIndex - 1].sickNm);
+      alert(suggestedSickList[selectedIndex - 1].sickNm);
     else if (/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(e.key)) {
       setSelectedIndex(-1);
     }
   };
 
-  const isNotFound = keyWord !== "" && suggetedSickList.length === 0;
-  const isExist = keyWord !== "" && suggetedSickList.length !== 0;
+  const isNotFound = keyWord !== "" && suggestedSickList.length === 0;
+  const isExist = keyWord !== "" && suggestedSickList.length !== 0;
   const isSearched = keyWord !== "";
 
   return (
@@ -100,9 +100,9 @@ function Search() {
         </SuggestionTitle>
       )}
       {isSearched &&
-        suggetedSickList.map((suggetedSick, index) => {
-          const { sickCd, sickNm } = suggetedSick;
-          const isLast = index === suggetedSickList.length - 1;
+        suggestedSickList.map((suggestedSick, index) => {
+          const { sickCd, sickNm } = suggestedSick;
+          const isLast = index === suggestedSickList.length - 1;
           const isSelected = index === selectedIndex - 1;
 
           return (
